@@ -47,15 +47,60 @@
 
 ## Tool Inventory
 
-<!-- Four lines per tool. This is worth 2 points and it's the single most
-     common place students lose them.
+### 1. search_listings
 
-     "Returns a list" earns NOTHING. The description has to say what is IN
-     the list.
+**What it does:**  
+Searches the listings data for items that match the user's description, requested size, and maximum price.
 
-     The empty case isn't optional either — it's the thing your loop branches
-     on, and if you don't decide it here you'll discover it as a crash in
-     Milestone 5. -->
+**Inputs:**
+- `description` (`str`) - words describing the item the user wants, such as style, category, color, or brand.
+- `size` (`str`) — the requested clothing size.
+- `max_price` (`float`) - the highest price the user is willing to pay.
+
+**Returns:**  
+A list of listing dictionaries that match the search. Each listing can contain fields such as `id`, `title`, `description`, `category`, `style_tags`, `size`, `condition`, `price`, `colors`, `brand`, and `platform`.
+
+**When there are no matches:**  
+Returns an empty list `[]`.
+
+
+### 2. suggest_outfit
+
+**What it does:**  
+Takes the selected listing and the user's wardrobe and generates outfit ideas using the new item with clothing the user already owns.
+
+**Inputs:**
+- `new_item` (`dict`) - the listing selected from the results returned by `search_listings`.
+- `wardrobe` (`list`) - a list of wardrobe-item dictionaries. Wardrobe items can contain `id`, `name`, `category`, `colors`, `style_tags`, and `notes`.
+
+**Returns:**  
+A text response containing one or more outfit suggestions that combine the new item with appropriate wardrobe items.
+
+**When there is nothing to use:**  
+If the wardrobe is empty, it returns general styling advice for the new item instead of failing.
+
+
+### 3. create_fit_card
+
+**What it does:**  
+Creates a short social-style caption for the selected item and outfit.
+
+**Inputs:**
+- `outfit` (`str`) - the outfit suggestion produced by `suggest_outfit`.
+- `new_item` (`dict`) - the selected listing originally returned by `search_listings`.
+
+**Returns:**  
+A short text caption describing the outfit in a way that could be posted or shared.
+
+**When there is nothing to give:**  
+If the required item or outfit information is missing, the tool should return a clear message explaining that there is not enough information to create the fit card.
+
+
+### Branch Rule
+
+If `search_listings` returns an empty list, the agent puts a helpful message in the session explaining that no matching listings were found and tells the user to change something such as the description, size, or maximum price. The agent then stops without calling `suggest_outfit` or `create_fit_card`.
+
+Otherwise, the agent selects the first matching listing, stores it in the session, and continues to `suggest_outfit`, followed by `create_fit_card`.->
 
 ### `search_listings`
 
