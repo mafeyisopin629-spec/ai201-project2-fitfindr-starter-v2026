@@ -1,0 +1,30 @@
+
+AI201 environment check
+------------------------------------------------------------
+[PASS] Python version
+         3.13.0 on Windows
+[PASS] Virtual environment
+         C:\Users\feyit\ai201-project1-unofficial-guide-starter-v2026\ai201-project2-fitfindr-starter-v2026\.venv
+[PASS] Pinned packages
+         all 6 import cleanly
+[PASS] Free disk space
+         219.4 GB
+[PASS] Memory
+         7.7 GB
+[PASS] Key hygiene
+         .env is ignored by git
+[FAIL] API key
+         GEMINI_API_KEY still holds the placeholder text.
+[PASS] MCP
+         server and client both import
+[PASS] Project data
+         40 listings, 10 wardrobe items
+[SKIP] Model call
+         no key to test with
+------------------------------------------------------------
+8 passed, 1 failed, 0 to look at, 1 skipped
+
+Not ready yet. Fix the FAIL lines above, then run test.py again.
+Still stuck after one honest attempt? Post the whole output in the
+help channel — the day before class, not the morning of.
+
