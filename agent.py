@@ -12,7 +12,7 @@ Build and test your three tools in `tools.py` first. Then come here.
 
     python agent.py          runs both example paths below
 """
-
+import re
 import config
 import trace
 from tools import search_listings, suggest_outfit, create_fit_card
@@ -107,9 +107,93 @@ def run_agent(query: str, wardrobe: dict) -> dict:
     """
     session = new_session(query, wardrobe)
 
-    # TODO: delete these two lines and build the loop.
-    session["error"] = "The planning loop isn't built yet — see the TODO in agent.py."
-    return session
+    
+    query_lower = query.lower()
+
+    price_match = re.search(
+        r"(?:under|max(?:imum)?(?:\s+price)?(?:\s+of)?)\s*\$?\s*(\d+(?:\.\d+)?)",
+        query_lower,
+    )
+
+    size_match = re.search(
+        r"\bsize\s+([a-z0-9./-]+)",
+        query_lower,
+        re.IGNORECASE,
+    )
+
+    max_price = float(price_match.group(1)) if price_match else None
+    size = size_match.group(1) if size_match else None
+
+    description = query
+
+    if price_match:
+        description = (
+            description[:price_match.start()]
+            + description[price_match.end():]
+        )
+
+    description = re.sub(
+        r"\bsize\s+[a-z0-9./-]+",
+        "",
+        description,
+        flags=re.IGNORECASE,
+    )
+
+    description = re.sub(
+        r"^\s*(?:i'?m\s+)?(?:looking\s+for|searching\s+for|want|find\s+me)\s+(?:a|an)?\s*",
+        "",
+        description,
+        flags=re.IGNORECASE,
+    )
+
+    description = " ".join(description.split()).strip(" ,.-")
+
+    session["parsed"] = {
+        "description": description,
+        "size": size,
+        "max_price": max_price,
+    }
+
+    step = "search"
+    count = 0
+
+    while True:
+        count += 1
+        trace.check_iterations(count)
+
+        if step == "search":
+            session["search_results"] = search_listings(
+                description=session["parsed"]["description"],
+                size=session["parsed"]["size"],
+                max_price=session["parsed"]["max_price"],
+            )
+
+            if not session["search_results"]:
+                session["error"] = (
+                    "I couldn't find any matching listings. Try changing the "
+                    "description, choosing a different size, or increasing "
+                    "your maximum price."
+                )
+                return session
+
+            session["selected_item"] = session["search_results"][0]
+            step = "outfit"
+            continue
+
+        if step == "outfit":
+            session["outfit_suggestion"] = suggest_outfit(
+                session["selected_item"],
+                session["wardrobe"],
+            )
+            step = "fit_card"
+            continue
+
+        if step == "fit_card":
+            session["fit_card"] = create_fit_card(
+                session["outfit_suggestion"],
+                session["selected_item"],
+            )
+            return session
 
 
 # ── running it directly ───────────────────────────────────────────────────────
